@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, Plus, Play,
   Share2,
-  LayoutGrid, Trash2, Crown
+  Trash2, Crown,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { 
   ref, onValue, push, serverTimestamp, 
@@ -132,10 +133,8 @@ const Room: React.FC = () => {
   const navigate = useNavigate();
   const playerRef = useRef<any>(null);
   const isFirstLoad = useRef(true);
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const [url, setUrl] = useState<string>('');
-  const [inputUrl, setInputUrl] = useState<string>('');
   const [playing, setPlaying] = useState<boolean>(false);
   const [isLocalAction, setIsLocalAction] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -156,16 +155,6 @@ const Room: React.FC = () => {
   const [avatarError, setAvatarError] = useState<boolean>(false);
   const [avatarSrc, setAvatarSrc] = useState<string>('');
   const [avatarTriedAlt, setAvatarTriedAlt] = useState<boolean>(false);
-  const [isPlayerHovered, setIsPlayerHovered] = useState<boolean>(false);
-
-  const handlePlayerMouseEnter = () => {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    setIsPlayerHovered(true);
-  };
-
-  const handlePlayerMouseLeave = () => {
-    hoverTimeoutRef.current = setTimeout(() => setIsPlayerHovered(false), 600);
-  };
 
   const triggerToast = (msg: string) => {
     setShowToast(msg);
@@ -397,13 +386,6 @@ const Room: React.FC = () => {
     triggerToast("Video eklendi!");
   };
 
-  const handleAddToQueue = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputUrl.trim() || !roomId) return;
-    addVideoToQueue(inputUrl);
-    setInputUrl('');
-  };
-
   const handleAddToQueueFromSidebar = (e: React.FormEvent) => {
     e.preventDefault();
     if (!queueInputUrl.trim() || !roomId) return;
@@ -543,69 +525,17 @@ const Room: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div
-        className={cn("flex-1 flex flex-col min-w-0 h-full relative transition-all duration-500", isSidebarOpen ? "lg:mr-[400px]" : "mr-0")}
-        onMouseEnter={handlePlayerMouseEnter}
-        onMouseLeave={handlePlayerMouseLeave}
-      >
-        <header className={cn(
-          "absolute top-6 left-6 right-6 z-50 flex flex-col gap-3 pointer-events-none sm:flex-row sm:items-center sm:justify-between",
-          "transition-opacity duration-300",
-          isPlayerHovered ? "opacity-100" : "opacity-0"
-        )}>
-          <div className="flex items-center gap-4 px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl pointer-events-auto">
-            <div onClick={() => navigate('/')} className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center cursor-pointer"><Play fill="white" size={20} /></div>
-            <div className="flex flex-col text-left text-white">
-              <h1 className="text-sm font-black uppercase leading-none italic">H2G</h1>
-              <span className="text-[10px] text-slate-500 font-mono mt-1">{roomId}</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 pointer-events-auto">
-            <div className="flex bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-1 gap-1">
-              <button onClick={() => { navigator.clipboard.writeText(window.location.href); triggerToast("Link kopyalandı!"); }} className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"><Share2 size={18} /></button>
-              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={cn("p-2.5 rounded-xl transition-all", isSidebarOpen ? "bg-blue-600 text-white" : "text-slate-400")}><LayoutGrid size={18} /></button>
-              {isHost && <button onClick={deleteRoom} className="p-2.5 hover:bg-red-500/20 rounded-xl text-red-500"><Trash2 size={18} /></button>}
-            </div>
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <button onClick={() => setIsNickModalOpen(true)} className="bg-white/10 text-white px-3 py-2 rounded-xl font-bold text-xs border border-white/10">Nick</button>
-                {currentUser.isAnonymous ? (
-                  <button onClick={handleGoogleLogin} className="bg-white text-black px-4 py-2 rounded-xl font-bold text-xs">Giriş Yap</button>
-                ) : (
-                  <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 cursor-pointer" onClick={() => auth.signOut()}>
-                    {avatarSrc && !avatarError ? (
-                      <img
-                        src={avatarSrc}
-                        alt="Me"
-                        className="w-full h-full"
-                        referrerPolicy="no-referrer"
-                        crossOrigin="anonymous"
-                        onError={() => {
-                          if (!avatarTriedAlt && avatarSrc) {
-                            const retried = getRetriedPhotoUrl(avatarSrc);
-                            if (retried && retried !== avatarSrc) {
-                              setAvatarSrc(retried);
-                              setAvatarTriedAlt(true);
-                              return;
-                            }
-                          }
-                          setAvatarError(true);
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-slate-800 text-xs font-bold text-white">
-                        {(currentUser.displayName || '?')[0]}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button onClick={handleGoogleLogin} className="bg-white text-black px-4 py-2 rounded-xl font-bold text-xs">Giriş Yap</button>
-            )}
-          </div>
-        </header>
+      {/* Floating sidebar toggle — video sağ ortasında, YouTube kontrollerine değmiyor */}
+      {!isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-6 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/10 rounded-l-xl transition-all text-slate-400 hover:text-white"
+        >
+          <ChevronLeft size={14} />
+        </button>
+      )}
 
+      <div className={cn("flex-1 flex flex-col min-w-0 h-full relative transition-all duration-500", isSidebarOpen ? "lg:mr-[400px]" : "mr-0")}>
         <main className="flex-1 bg-black flex items-center justify-center relative overflow-hidden">
           {url ? (
             <div className="w-full h-full" key={url}>
@@ -626,29 +556,73 @@ const Room: React.FC = () => {
             <div className="text-center p-12 text-white">
               <div className="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-6"><Plus size={40} /></div>
               <h2 className="text-2xl font-bold mb-2">Sahne Boş</h2>
-              <p className="text-slate-400">Bir video linki ekleyerek başlayın.</p>
+              <p className="text-slate-400">Video eklemek için sağ paneli kullanın.</p>
             </div>
           )}
-          <div className={cn(
-            "absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50",
-            "pointer-events-none transition-opacity duration-300",
-            isPlayerHovered ? "opacity-100" : "opacity-0"
-          )}>
-            <form onSubmit={handleAddToQueue} className="pointer-events-auto flex gap-2 bg-black/60 backdrop-blur-2xl p-2 rounded-2xl border border-white/10 shadow-2xl text-left">
-              <input type="text" value={inputUrl} onChange={(e) => setInputUrl(e.target.value)} placeholder="Video linkini buraya yapıştırın..." className="flex-1 bg-transparent border-none px-4 py-2 text-sm text-white focus:outline-none" />
-              <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-all"><Plus size={18} /></button>
-            </form>
-          </div>
         </main>
       </div>
 
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.aside initial={{ x: 400 }} animate={{ x: 0 }} exit={{ x: 400 }} className="fixed top-0 right-0 w-full lg:w-[400px] h-full flex flex-col bg-[#020617] border-l border-white/5 z-[60]">
-            <div className="flex p-4 gap-2 text-center items-center justify-center">
-              <button onClick={() => setActiveTab('chat')} className={cn("flex-1 py-3 rounded-xl text-xs font-bold uppercase", activeTab === 'chat' ? "bg-blue-600 text-white" : "text-slate-500")}>Sohbet</button>
-              <button onClick={() => setActiveTab('queue')} className={cn("flex-1 py-3 rounded-xl text-xs font-bold uppercase", activeTab === 'queue' ? "bg-blue-600 text-white" : "text-slate-500")}>Sıra</button>
-              <button onClick={() => setActiveTab('users')} className={cn("flex-1 py-3 rounded-xl text-xs font-bold uppercase", activeTab === 'users' ? "bg-blue-600 text-white" : "text-slate-500")}>İzleyiciler</button>
+            {/* Sidebar header */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+                <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0"><Play fill="white" size={16} /></div>
+                <div className="flex flex-col text-left text-white">
+                  <h1 className="text-sm font-black uppercase leading-none italic">H2G</h1>
+                  <span className="text-[10px] text-slate-500 font-mono mt-0.5">{roomId}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button onClick={() => { navigator.clipboard.writeText(window.location.href); triggerToast("Link kopyalandı!"); }} className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"><Share2 size={16} /></button>
+                {isHost && <button onClick={deleteRoom} className="p-2 hover:bg-red-500/20 rounded-xl text-red-500"><Trash2 size={16} /></button>}
+                {currentUser ? (
+                  <>
+                    <button onClick={() => setIsNickModalOpen(true)} className="bg-white/10 text-white px-2.5 py-1.5 rounded-xl font-bold text-xs border border-white/10">Nick</button>
+                    {currentUser.isAnonymous ? (
+                      <button onClick={handleGoogleLogin} className="bg-white text-black px-3 py-1.5 rounded-xl font-bold text-xs">Giriş Yap</button>
+                    ) : (
+                      <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/10 cursor-pointer flex-shrink-0" onClick={() => auth.signOut()}>
+                        {avatarSrc && !avatarError ? (
+                          <img
+                            src={avatarSrc}
+                            alt="Me"
+                            className="w-full h-full"
+                            referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
+                            onError={() => {
+                              if (!avatarTriedAlt && avatarSrc) {
+                                const retried = getRetriedPhotoUrl(avatarSrc);
+                                if (retried && retried !== avatarSrc) {
+                                  setAvatarSrc(retried);
+                                  setAvatarTriedAlt(true);
+                                  return;
+                                }
+                              }
+                              setAvatarError(true);
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800 text-xs font-bold text-white">
+                            {(currentUser.displayName || '?')[0]}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button onClick={handleGoogleLogin} className="bg-white text-black px-3 py-1.5 rounded-xl font-bold text-xs">Giriş Yap</button>
+                )}
+                <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"><ChevronRight size={16} /></button>
+              </div>
+            </div>
+
+            {/* Tab butonları */}
+            <div className="flex px-4 pb-2 gap-2 text-center items-center justify-center">
+              <button onClick={() => setActiveTab('chat')} className={cn("flex-1 py-2.5 rounded-xl text-xs font-bold uppercase", activeTab === 'chat' ? "bg-blue-600 text-white" : "text-slate-500")}>Sohbet</button>
+              <button onClick={() => setActiveTab('queue')} className={cn("flex-1 py-2.5 rounded-xl text-xs font-bold uppercase", activeTab === 'queue' ? "bg-blue-600 text-white" : "text-slate-500")}>Sıra</button>
+              <button onClick={() => setActiveTab('users')} className={cn("flex-1 py-2.5 rounded-xl text-xs font-bold uppercase", activeTab === 'users' ? "bg-blue-600 text-white" : "text-slate-500")}>İzleyiciler</button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
               {activeTab === 'chat' && messages.map((msg) => (
