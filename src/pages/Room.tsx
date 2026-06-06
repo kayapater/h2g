@@ -132,6 +132,7 @@ const Room: React.FC = () => {
   const navigate = useNavigate();
   const playerRef = useRef<any>(null);
   const isFirstLoad = useRef(true);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const [url, setUrl] = useState<string>('');
   const [inputUrl, setInputUrl] = useState<string>('');
@@ -155,6 +156,16 @@ const Room: React.FC = () => {
   const [avatarError, setAvatarError] = useState<boolean>(false);
   const [avatarSrc, setAvatarSrc] = useState<string>('');
   const [avatarTriedAlt, setAvatarTriedAlt] = useState<boolean>(false);
+  const [isPlayerHovered, setIsPlayerHovered] = useState<boolean>(false);
+
+  const handlePlayerMouseEnter = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setIsPlayerHovered(true);
+  };
+
+  const handlePlayerMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => setIsPlayerHovered(false), 600);
+  };
 
   const triggerToast = (msg: string) => {
     setShowToast(msg);
@@ -532,8 +543,16 @@ const Room: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className={cn("flex-1 flex flex-col min-w-0 h-full relative transition-all duration-500", isSidebarOpen ? "lg:mr-[400px]" : "mr-0")}>
-        <header className="absolute top-6 left-6 right-6 z-50 flex flex-col gap-3 pointer-events-none sm:flex-row sm:items-center sm:justify-between">
+      <div
+        className={cn("flex-1 flex flex-col min-w-0 h-full relative transition-all duration-500", isSidebarOpen ? "lg:mr-[400px]" : "mr-0")}
+        onMouseEnter={handlePlayerMouseEnter}
+        onMouseLeave={handlePlayerMouseLeave}
+      >
+        <header className={cn(
+          "absolute top-6 left-6 right-6 z-50 flex flex-col gap-3 pointer-events-none sm:flex-row sm:items-center sm:justify-between",
+          "transition-opacity duration-300",
+          isPlayerHovered ? "opacity-100" : "opacity-0"
+        )}>
           <div className="flex items-center gap-4 px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl pointer-events-auto">
             <div onClick={() => navigate('/')} className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center cursor-pointer"><Play fill="white" size={20} /></div>
             <div className="flex flex-col text-left text-white">
@@ -610,8 +629,12 @@ const Room: React.FC = () => {
               <p className="text-slate-400">Bir video linki ekleyerek başlayın.</p>
             </div>
           )}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50">
-            <form onSubmit={handleAddToQueue} className="flex gap-2 bg-black/60 backdrop-blur-2xl p-2 rounded-2xl border border-white/10 shadow-2xl text-left">
+          <div className={cn(
+            "absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50",
+            "pointer-events-none transition-opacity duration-300",
+            isPlayerHovered ? "opacity-100" : "opacity-0"
+          )}>
+            <form onSubmit={handleAddToQueue} className="pointer-events-auto flex gap-2 bg-black/60 backdrop-blur-2xl p-2 rounded-2xl border border-white/10 shadow-2xl text-left">
               <input type="text" value={inputUrl} onChange={(e) => setInputUrl(e.target.value)} placeholder="Video linkini buraya yapıştırın..." className="flex-1 bg-transparent border-none px-4 py-2 text-sm text-white focus:outline-none" />
               <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-all"><Plus size={18} /></button>
             </form>
