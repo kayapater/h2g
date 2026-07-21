@@ -39,6 +39,7 @@ const Home = () => {
   };
 
   return (
+    <>
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#020617] px-6 py-12 text-white font-sans">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full" />
@@ -220,17 +221,17 @@ const Home = () => {
           </div>
         </motion.div>
       </div>
-    </div>
 
-    <div className="text-center pb-8">
-      <a href="https://github.com/kayapater" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-400 text-xs transition-colors">
-        @kayapater
-      </a>
+      <div className="text-center pb-8">
+        <a href="https://github.com/kayapater" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-400 text-xs transition-colors">
+          @kayapater
+        </a>
+      </div>
     </div>
 
     {showEmail && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowEmail(false)}>
-        <div className="bg-[#0f172a] border border-white/10 rounded-[28px] p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
+        <div className="relative bg-[#0f172a] border border-white/10 rounded-[28px] p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
           <button onClick={() => setShowEmail(false)} className="absolute top-3 right-4 text-slate-500 hover:text-white text-lg">✕</button>
           <div className="text-3xl mb-3">📬</div>
           <h3 className="text-lg font-black mb-2 text-white">Haberdar Ol</h3>
@@ -244,6 +245,7 @@ const Home = () => {
         </div>
       </div>
     )}
+    </>
   );
 };
 
