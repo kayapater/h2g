@@ -203,3 +203,9 @@ const Home = () => {
             </div>
           </div>
         </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
