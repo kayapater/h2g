@@ -8,7 +8,23 @@ import {
 
 const Home = () => {
   const [roomId, setRoomId] = useState('');
+  const [showEmail, setShowEmail] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailMsg, setEmailMsg] = useState('');
+  const [emailOk, setEmailOk] = useState(false);
   const navigate = useNavigate();
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailMsg('');
+    try {
+      const res = await fetch('/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
+      const data = await res.json();
+      setEmailMsg(data.message || data.error);
+      setEmailOk(!!data.success);
+      if (data.success) { setEmail(''); setTimeout(() => setShowEmail(false), 1500); }
+    } catch { setEmailMsg('Bağlantı hatası'); setEmailOk(false); }
+  };
 
   const createRoom = () => {
     const newRoomId = Math.random().toString(36).substring(2, 9);
@@ -155,7 +171,7 @@ const Home = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
-                  <button className="flex items-center justify-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-2xl font-black text-base transition-all active:scale-95 shadow-lg shadow-blue-600/20">
+                  <button onClick={() => setShowEmail(true)} className="flex items-center justify-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-2xl font-black text-base transition-all active:scale-95 shadow-lg shadow-blue-600/20">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
                     Beni Bilgilendir
                   </button>
@@ -205,6 +221,23 @@ const Home = () => {
         </motion.div>
       </div>
     </div>
+
+    {showEmail && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowEmail(false)}>
+        <div className="bg-[#0f172a] border border-white/10 rounded-[28px] p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
+          <button onClick={() => setShowEmail(false)} className="absolute top-3 right-4 text-slate-500 hover:text-white text-lg">✕</button>
+          <div className="text-3xl mb-3">📬</div>
+          <h3 className="text-lg font-black mb-2 text-white">Haberdar Ol</h3>
+          <p className="text-slate-400 text-xs mb-5">Eklenti yayına girdiğinde ilk sen haberdar ol.</p>
+          <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="E-posta adresin..." required
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"/>
+            <button type="submit" className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white transition-all active:scale-95">Beni Bilgilendir</button>
+          </form>
+          {emailMsg && <p className={`text-xs mt-3 ${emailOk ? 'text-green-400' : 'text-red-400'}`}>{emailMsg}</p>}
+        </div>
+      </div>
+    )}
   );
 };
 
