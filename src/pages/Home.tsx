@@ -222,6 +222,12 @@ const Home = () => {
       </div>
     </div>
 
+    <div className="text-center pb-8">
+      <a href="https://github.com/kayapater" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-400 text-xs transition-colors">
+        @kayapater
+      </a>
+    </div>
+
     {showEmail && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowEmail(false)}>
         <div className="bg-[#0f172a] border border-white/10 rounded-[28px] p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
