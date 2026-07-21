@@ -27,6 +27,8 @@ lerna-debug.log*
 *.runtimeconfig.json
 firebase-debug.log*
 
+.wrangler/
+
 # Editors and OS files
 .vscode/*
 !.vscode/extensions.json

@@ -5,6 +5,14 @@
         ".read": "auth != null",
         ".write": "auth != null"
       }
+    },
+    "subscribers": {
+      ".read": false,
+      ".write": "newData.hasChildren(['email','createdAt']) && newData.child('email').isString() && newData.child('email').val().matches(/^[^@]+@[^@]+\\.[^@]+$/)",
+      ".validate": "newData.hasChildren(['email','createdAt'])",
+      "$uid": {
+        ".validate": "newData.hasChildren(['email','createdAt'])"
+      }
     }
   }
 }
