@@ -82,7 +82,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                <h2 className="text-4xl font-bold tracking-tight">Sinema Başlat</h2>
+                <h2 className="text-4xl font-bold tracking-tight">Oda Oluştur</h2>
                 <p className="text-slate-400 max-w-sm">Yeni bir özel oda oluşturun ve arkadaşlarınızı saniyeler içinde birlikte izlemeye davet edin.</p>
                 <button
                   onClick={createRoom}
@@ -103,7 +103,7 @@ const Home = () => {
                 <Users size={32} />
               </div>
               <div className="space-y-4 text-left">
-                <h2 className="text-3xl font-bold tracking-tight">Partiye Katıl</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Odaya Katıl</h2>
                 <form onSubmit={joinRoom} className="space-y-3">
                   <input
                     type="text"
