@@ -28,13 +28,20 @@ export async function onRequestPost(context) {
       }]
     };
 
-    await fetch('https://api.mailchannels.net/tx/v1/send', {
+    const mcResponse = await fetch('https://api.mailchannels.net/tx/v1/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mailPayload),
     });
 
-    return Response.json({ success: true, message: 'Kaydoldun! Onay maili gönderildi.' });
+    const mcBody = await mcResponse.text();
+    console.log('MailChannels response:', mcResponse.status, mcBody);
+
+    if (mcResponse.status === 202) {
+      return Response.json({ success: true, message: 'Kaydoldun! Onay maili gönderildi.' });
+    } else {
+      return Response.json({ error: 'Mail gönderilemedi: ' + mcBody }, { status: 502 });
+    }
   } catch (e) {
     return Response.json({ error: 'Bir hata oluştu, tekrar dene.' }, { status: 500 });
   }
